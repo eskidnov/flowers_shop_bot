@@ -6,10 +6,13 @@ from catalog import Catalog
 token = '325287100:AAGlQ6zXH0lM28Kx5MPgEReMOyfCeP8REYc'
 chanel = -1001145764283
 
+shelve_name = 'shelve.db'
+
 # TEXT
 main_menu = 'Основное меню'
 main_menu_keyboard = [
     'Наш каталог',
+    'Корзина',
     'Доставка',
     'О нас',
     'Контакты',
@@ -19,19 +22,25 @@ back_button = 'Назад'
 
 catalog = Catalog('Наш каталог', [
     Catalog('Букеты', [
-        Catalog('Хризантемы', [Catalog('Букет 1'), Catalog('Букет 2')]),
-        Catalog('Пионы', [Catalog('Букет 3'), Catalog('Букет 4')]),
+        Catalog('Хризантемы', [Catalog('Букет 1', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg']),
+                               Catalog('Букет 2', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
+        Catalog('Пионы', [Catalog('Букет 3', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg']),
+                          Catalog('Букет 4', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
     ]),
     Catalog('Розы', [
-        Catalog('Красные', [Catalog('Букет 5')]),
-        Catalog('Белые', [Catalog('Букет 6')]),
+        Catalog('Красные', [Catalog('Букет 5', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
+        Catalog('Белые', [Catalog('Букет 6', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
     ]),
     Catalog('Подарки', [
-        Catalog('Красные', [Catalog('Букет 7')]),
-        Catalog('Белые', [Catalog('Букет 8')]),
+        Catalog('Красные', [Catalog('Букет 7', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
+        Catalog('Белые', [Catalog('Букет 8', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
     ]),
 ])
 
+add_to_basket = 'В корзину'
+basket = 'Корзина'
+empty_basket = 'Корзина пуста!'
+clear_button = 'Очистить'
 
 # catalog = [
 #     'Букеты',

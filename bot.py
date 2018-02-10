@@ -2,7 +2,7 @@
 
 import telebot
 import config
-# import utils
+import utils
 from config import catalog as cat
 
 bot = telebot.TeleBot(config.token)
@@ -11,6 +11,8 @@ bot = telebot.TeleBot(config.token)
 def start(message):
     print('Бот запущен пользователем', message.from_user.id)
     bot.send_message(message.chat.id, config.main_menu, parse_mode='markdown', reply_markup=main_menu_keyboard)
+    utils.del_user_basket(message.from_user.id)
+    utils.set_basket(message.from_user.id)
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -37,13 +39,13 @@ def catalog_button(message):
     print (cat.get_all_categories())
     print('Пользователь', message.from_user.id, 'открыл "Наш каталог"')
     chat_id = message.chat.id
-    keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
+    keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
     buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=button_text.item)
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
     bot.send_message(chat_id, '*'+config.main_menu_keyboard[0]+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(chat_id, '.', reply_markup=keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, 'Выберите нужный вам пункт меню', reply_markup=keyboard, parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
@@ -51,17 +53,76 @@ def catalog(query):
     category = cat.find(query.data)
     bot.answer_callback_query(query.id)
     print('Пользователь', query.message.from_user.id, 'открыл', category.item)
-    keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
-    buttons = (telebot.types.InlineKeyboardButton(text=subcat.item, callback_data=subcat.item)
-               for subcat in category.categories)
-    keyboard.add(*buttons)
-    # bot.delete_message(query.message.chat.id, query.message.message_id + 1)
-    # bot.delete_message(query.message.chat.id, query.message.message_id)
-    bot.send_message(query.message.chat.id, '*'+category.item+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(query.message.chat.id, '.', reply_markup=keyboard)
+    if isinstance(category.categories[0].categories[0], str):
+        for item in category.categories:
+            keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+            keyboard.add(telebot.types.InlineKeyboardButton(text=config.add_to_basket,
+                                                            callback_data=config.add_to_basket+'_'+item.item))
+            bot.send_message(query.message.chat.id, '*' + item.item + '*', reply_markup=back_keyboard,
+                             parse_mode='Markdown')
+            bot.send_photo(query.message.chat.id, caption=item.categories[0], photo=item.categories[1],
+                           reply_markup=keyboard)
+    else:
+        keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+        buttons = (telebot.types.InlineKeyboardButton(text=subcat.item, callback_data=subcat.item)
+                   for subcat in category.categories)
+        keyboard.add(*buttons)
 
-# @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_items())
-# def
+        bot.delete_message(query.message.chat.id, query.message.message_id - 1)
+        bot.delete_message(query.message.chat.id, query.message.message_id)
+        bot.send_message(query.message.chat.id, '*'+category.item+'*', reply_markup=back_keyboard, parse_mode='Markdown')
+        bot.send_message(query.message.chat.id, 'Выберите нужный вам пункт меню', reply_markup=keyboard)
+
+
+
+@bot.callback_query_handler(func=lambda query: config.add_to_basket in query.data)
+def add_to_basket(query):
+    print(query.data)
+    item = query.data.split('_')[1]
+    utils.add_to_basket(query.from_user.id, item)
+    bot.answer_callback_query(callback_query_id=query.id, text='Успешно добавлено!')
+
+
+
+@bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[1], content_types=['text'])
+def basket(message):
+    user_id = message.from_user.id
+    user_basket = utils.get_basket(user_id)
+
+    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    clear_button = telebot.types.KeyboardButton(config.clear_button)
+    back_button = telebot.types.KeyboardButton(config.back_button)
+    keyboard.add(clear_button, back_button)
+    bot.send_message(message.chat.id, config.basket, reply_markup=keyboard)
+    if user_basket:
+        for item in user_basket:
+            product = cat.find(item)
+            bot.send_message(message.chat.id, '*'+product.item+'*', parse_mode='Markdown')
+            bot.send_photo(message.chat.id, caption=product.categories[0], photo=product.categories[1])
+    else:
+        bot.send_message(chat_id=message.chat.id, text=config.empty_basket)
+
+@bot.message_handler(func=lambda item: item.text == config.clear_button, content_types=['text'])
+def clear_basket(message):
+    user_id = message.from_user.id
+    user_basket = utils.get_basket(user_id)
+
+    for item in user_basket:
+        utils.del_from_basket(user_id, item)
+
+    bot.send_message(message.chat.id, config.empty_basket)
+
+    # @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_items())
+    # def items(query):
+    #     item = cat.find(query.data)
+    #     bot.answer_callback_query(query.id)
+    #     print('Пользователь', query.message.from_user.id, 'открыл', item.item)
+    #     # bot.delete_message(query.message.chat.id, query.message.message_id + 1)
+    #     # bot.delete_message(query.message.chat.id, query.message.message_id)
+    #     bot.send_message(query.message.chat.id, '*' + item.item + '*', reply_markup=back_keyboard,
+    #                      parse_mode='Markdown')
+    #     bot.send_message(query.message.chat.id, str(item.categories))
+
 
     # # print('Пользователь', query.from_user.id, 'открыл расписание на 21 ноября"')
     # # bot.answer_callback_query(query.id)
@@ -328,7 +389,7 @@ def catalog(query):
 if __name__ == '__main__':
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     buttons = (telebot.types.KeyboardButton(text=button_text) for button_text in config.main_menu_keyboard
-               if config.main_menu_keyboard.index(button_text) < 1)
+               if config.main_menu_keyboard.index(button_text) < 2)
     main_menu_keyboard.add(*buttons)
     # main_menu_keyboard.row(config.main_menu_keyboard[6])
     # main_menu_keyboard.row(config.main_menu_keyboard[7])

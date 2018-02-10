@@ -15,8 +15,8 @@ class Catalog:
             self.categories = None
 
     def __view(self, all_categories):
-        #print (self.item, self.categories)
-        if not self.categories:
+        # print (self.item, self.categories)
+        if not self.categories or isinstance(self.categories[0], str):
             return
         all_categories.append(self.item)
         for subcat in self.categories:
@@ -30,11 +30,11 @@ class Catalog:
 
     def find(self, category):
         print(self.item)
-        if self.item == category or not self.categories:
+        if self.item == category or not self.categories or isinstance(self.categories[0], str):
             return self
         for subcat in self.categories:
             a = subcat.find(category)
-            if a is None:
+            if a is None or isinstance(self.categories[0], str):
                 continue
             if a.item == category:
                 return a
@@ -42,7 +42,7 @@ class Catalog:
 
 
     def __items(self, all_items):
-        if not self.categories:
+        if not self.categories or isinstance(self.categories[0], str):
             all_items.append(self.item)
             return
         for subcat in self.categories:

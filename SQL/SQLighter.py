@@ -7,10 +7,16 @@ class SQLighter:
         self.connection = sqlite3.connect(database)
         self.cursor = self.connection.cursor()
 
-    def select_all(self):
-        """ Получаем все строки """
+    def select_all(self, table="shop"):
+        """ Получаем все строки из таблицы table """
         with self.connection:
-            return self.cursor.execute('SELECT * FROM shop').fetchall()
+            # TODO: SQL injection???
+            return self.cursor.execute('SELECT * FROM ' + table).fetchall()
+
+    def insert_request(self, name, email, phone, address, buys_list, summary_cost, comment, status):
+        with self.connection:
+            return self.cursor.execute('INSERT INTO flowers_request VALUES ?,?,?,?,?,?,?,?', \
+                (name, email, phone, address, buys_list, summary_cost, comment, status))
 
     def select_single(self, rownum):
         """ Получаем одну строку с номером rownum """

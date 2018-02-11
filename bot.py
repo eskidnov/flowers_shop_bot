@@ -2,7 +2,7 @@
 
 import telebot
 import config
-import utils
+# import utils
 from config import catalog as cat
 
 bot = telebot.TeleBot(config.token)
@@ -11,8 +11,6 @@ bot = telebot.TeleBot(config.token)
 def start(message):
     print('Бот запущен пользователем', message.from_user.id)
     bot.send_message(message.chat.id, config.main_menu, parse_mode='markdown', reply_markup=main_menu_keyboard)
-    utils.del_user_basket(message.from_user.id)
-    utils.set_basket(message.from_user.id)
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -39,13 +37,13 @@ def catalog_button(message):
     print (cat.get_all_categories())
     print('Пользователь', message.from_user.id, 'открыл "Наш каталог"')
     chat_id = message.chat.id
-    keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+    keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
     buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=button_text.item)
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
     bot.send_message(chat_id, '*'+config.main_menu_keyboard[0]+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(chat_id, 'Выберите нужный вам пункт меню', reply_markup=keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, '.', reply_markup=keyboard, parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
@@ -184,6 +182,9 @@ def got_payment(message):
     #                      parse_mode='Markdown')
     #     bot.send_message(query.message.chat.id, str(item.categories))
 
+
+# @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_items())
+# def
 
     # # print('Пользователь', query.from_user.id, 'открыл расписание на 21 ноября"')
     # # bot.answer_callback_query(query.id)
@@ -450,7 +451,7 @@ def got_payment(message):
 if __name__ == '__main__':
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     buttons = (telebot.types.KeyboardButton(text=button_text) for button_text in config.main_menu_keyboard
-               if config.main_menu_keyboard.index(button_text) < 2)
+               if config.main_menu_keyboard.index(button_text) < 1)
     main_menu_keyboard.add(*buttons)
     # main_menu_keyboard.row(config.main_menu_keyboard[6])
     # main_menu_keyboard.row(config.main_menu_keyboard[7])

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from catalog import Catalog
+import database_communication
 
 # TEST
 token = '325287100:AAGlQ6zXH0lM28Kx5MPgEReMOyfCeP8REYc'
@@ -21,7 +22,11 @@ main_menu_keyboard = [
 ]
 back_button = 'Назад'
 
-catalog = Catalog('Наш каталог', [
+catalog = database_communication.resolve_assortment_tree(database_communication.get_assortment())
+
+
+"""
+Catalog('Наш каталог', [
     Catalog('Букеты', [
         Catalog('Хризантемы', [Catalog('Букет 1', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg']),
                                Catalog('Букет 2', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
@@ -37,6 +42,7 @@ catalog = Catalog('Наш каталог', [
         Catalog('Белые', [Catalog('Букет 8', ['Цена', 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'])]),
     ]),
 ])
+"""
 
 add_to_basket = 'В корзину'
 basket = 'Корзина'

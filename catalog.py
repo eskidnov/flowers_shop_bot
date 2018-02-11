@@ -55,3 +55,16 @@ class Catalog:
 
     def find_item(self, item):
         pass# if self.item == item
+    
+    def to_str(self, shift=0):
+        ans = ' ' * shift + self.item +  ' {\n'
+        if not isinstance(self.categories[0], Catalog):
+            ans += str(self.categories)
+        else:
+            for son in self.categories:
+                ans += son.to_str(shift + 2)
+        ans += '}\n'
+        return ans
+
+    def __str__(self):
+        return self.to_str(0)

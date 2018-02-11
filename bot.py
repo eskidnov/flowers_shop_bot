@@ -4,6 +4,7 @@ import telebot
 import config
 import utils
 from config import catalog as cat
+from database_communication import append_request
 
 bot = telebot.TeleBot(config.token)
 
@@ -11,8 +12,6 @@ bot = telebot.TeleBot(config.token)
 def start(message):
     print('Бот запущен пользователем', message.from_user.id)
     bot.send_message(message.chat.id, config.main_menu, parse_mode='markdown', reply_markup=main_menu_keyboard)
-    utils.del_user_basket(message.from_user.id)
-    utils.set_basket(message.from_user.id)
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -39,13 +38,13 @@ def catalog_button(message):
     print (cat.get_all_categories())
     print('Пользователь', message.from_user.id, 'открыл "Наш каталог"')
     chat_id = message.chat.id
-    keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+    keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
     buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=button_text.item)
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
     bot.send_message(chat_id, '*'+config.main_menu_keyboard[0]+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(chat_id, 'Выберите нужный вам пункт меню', reply_markup=keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, '.', reply_markup=keyboard, parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
@@ -171,6 +170,15 @@ def got_payment(message):
                      text=config.successful_payment.format(message.successful_payment.total_amount / 100,
                                                             message.successful_payment.currency),
                      parse_mode='Markdown')
+    order_info = message.successful_payment.order_info
+    user_id = message.from_user.id
+    user_basket = utils.get_basket(user_id)
+    buys_list = ''
+    for item in user_basket:
+        buys_list += item + '\n'
+    append_request(order_info.name, order_info.email, order_info.phone_number, order_info.shipping_address,
+                   buys_list, message.successful_payment.total_amount / 100, '')
+
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[2], content_types=['text'])
@@ -237,6 +245,7 @@ def contacts(message):
 @bot.callback_query_handler(func=lambda query: query.data)
 def something_else(message):
     bot.send_message(message.chat.id, config.error_category, reply_markup=back_keyboard)
+
 
 
 # @bot.message_handler(content_types=['photo'])

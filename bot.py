@@ -90,9 +90,10 @@ def basket(message):
     user_basket = utils.get_basket(user_id)
 
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    confirm_button = telebot.types.KeyboardButton(config.confirm_button)
     clear_button = telebot.types.KeyboardButton(config.clear_button)
     back_button = telebot.types.KeyboardButton(config.back_button)
-    keyboard.add(clear_button, back_button)
+    keyboard.add(confirm_button, clear_button, back_button)
     bot.send_message(message.chat.id, config.basket, reply_markup=keyboard)
     if user_basket:
         for item in user_basket:
@@ -111,6 +112,66 @@ def clear_basket(message):
         utils.del_from_basket(user_id, item)
 
     bot.send_message(message.chat.id, config.empty_basket)
+
+@bot.message_handler(func=lambda item: item.text == config.confirm_button, content_types=['text'])
+def check_basket(message):
+    user_id = message.from_user.id
+    user_basket = utils.get_basket(user_id)
+
+    bot.send_message(message.chat.id, config.ordering, reply_markup=back_keyboard)
+    if user_basket:
+        res = ''
+        keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+        pay_button = telebot.types.InlineKeyboardButton(text=config.pay_button, pay=True)
+        keyboard.add(pay_button)
+        for item in user_basket:
+            res += item + '\n'
+        # bot.send_message(message.chat.id, res, parse_mode='Markdown', reply_markup=keyboard)
+
+        bot.send_invoice(chat_id=message.chat.id,
+                         title=config.user_basket,
+                         description=res,
+                         invoice_payload='invoice',
+                         provider_token=config.provider_token,
+                         start_parameter='invoice',
+                         currency='rub',
+                         prices=[telebot.types.LabeledPrice(label=config.user_basket, amount=10000)],
+                         need_name=True,
+                         need_phone_number=True,
+                         need_shipping_address=True,
+                         is_flexible=True,
+                         reply_markup=keyboard)
+    else:
+        bot.send_message(chat_id=message.chat.id, text=config.empty_basket)
+
+def set_shipping_option(id, title, *price):
+    shipping_option = telebot.types.ShippingOption(id=id, title=title)
+    shipping_option.add_price(*price)
+    return shipping_option
+
+@bot.shipping_query_handler(func=lambda query: True)
+def shipping(shipping_query):
+    bot.answer_shipping_query(shipping_query_id=shipping_query.id,
+                              ok=True,
+                              shipping_options=[set_shipping_option('delivery', 'Доставка курьером',
+                                                                    telebot.types.LabeledPrice('Курьер', 10000)),],
+                              error_message='error')
+
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query_id=pre_checkout_query.id,
+                                  ok=True,
+                                  error_message='error')
+
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    bot.send_message(chat_id=message.chat.id,
+                     text=config.successful_payment.format(message.successful_payment.total_amount / 100,
+                                                            message.successful_payment.currency),
+                     parse_mode='Markdown')
+
 
     # @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_items())
     # def items(query):

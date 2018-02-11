@@ -4,6 +4,7 @@ from catalog import Catalog
 
 # TEST
 token = '325287100:AAGlQ6zXH0lM28Kx5MPgEReMOyfCeP8REYc'
+provider_token = '381764678:TEST:1601'
 chanel = -1001145764283
 
 shelve_name = 'shelve.db'
@@ -39,8 +40,14 @@ catalog = Catalog('Наш каталог', [
 
 add_to_basket = 'В корзину'
 basket = 'Корзина'
+confirm_button = 'Оформить заказ'
 empty_basket = 'Корзина пуста!'
 clear_button = 'Очистить'
+pay_button = 'Оплатить'
+user_basket = 'Ваш заказ:'
+ordering = 'Оформление заказа'
+successful_payment = 'Спасибо за покупку! Мы доставим ваш товар на сумму `{} {}` как можно быстрее! Оставайтесь на связи.'
+
 
 # catalog = [
 #     'Букеты',

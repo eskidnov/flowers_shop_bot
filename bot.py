@@ -10,6 +10,8 @@ bot = telebot.TeleBot(config.token)
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    utils.del_user_basket(message.from_user.id)
+    utils.set_basket(message.from_user.id)
     print('Бот запущен пользователем', message.from_user.id)
     bot.send_message(message.chat.id, config.main_menu, parse_mode='markdown', reply_markup=main_menu_keyboard)
 

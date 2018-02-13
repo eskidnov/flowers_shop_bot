@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from SQL.SQLighter import SQLighter
 from catalog import Catalog
-
+from email_sender import sendemail
 
 def get_assortment():
     # download assortment from database 
@@ -46,6 +46,13 @@ def resolve_assortment_tree(assortment):
 
 
 def append_request(name, email, phone, address, buys_list, summary_cost, comment):
-    # TODO: сделать оправку email
+    # TODO: переместить отправку email и поднастроить ее
+
+    sendemail("botograthautomat@gmail.com", \
+        email if email is not None else "andreypopovkin@yandex.ru", \
+        [],\
+        "Заказ", \
+        "Hello, " + name + + "!\nYour request:\n" + str(buys_list) + "\n на сумму: " + summary_cost + "\n",\
+        "botograthautomat", "abracadabr")
     database = SQLighter("../../django/db.sqlite3")
     database.insert_request(name, email, phone, address, buys_list, summary_cost, comment, 0)

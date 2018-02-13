@@ -138,6 +138,7 @@ def check_basket(message):
                          currency='rub',
                          prices=[telebot.types.LabeledPrice(label=config.user_basket, amount=10000)],
                          need_name=True,
+                         need_email=True,
                          need_phone_number=True,
                          need_shipping_address=True,
                          is_flexible=True,

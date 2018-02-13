@@ -3,11 +3,13 @@ from SQL.SQLighter import SQLighter
 from catalog import Catalog
 from email_sender import sendemail
 
+database_location = "../../django/db.sqlite3"
+
 def get_assortment():
     # download assortment from database 
     # TODO: always open database
     
-    database = SQLighter("../../django/db.sqlite3")
+    database = SQLighter(database_location)
     assortment = database.select_all("flowers_productposition")
     database.close()
     return assortment
@@ -55,5 +57,5 @@ def append_request(name, email, phone, address, buys_list, summary_cost, comment
         "Заказ", \
         "Hello, " + name + "!\nYour request:\n" + str(buys_list) + "\n на сумму: " + summary_cost + "\n",\
         "botograthautomat", "abracadabr")
-    database = SQLighter("../../django/db.sqlite3")
+    database = SQLighter(database_location)
     database.insert_request(name, email, phone, address, buys_list, summary_cost, comment, 0)

@@ -45,8 +45,8 @@ def catalog_button(message):
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
-    bot.send_message(chat_id, '*'+config.main_menu_keyboard[0]+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(chat_id, '.', reply_markup=keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, config.main_menu_keyboard[0], reply_markup=back_keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, 'Выберите категорию', reply_markup=keyboard, parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
@@ -193,15 +193,6 @@ def about(message):
 
 
 
-# ВЛАД!!!
-# ЗДЕСЬ НАЧИНАЕТСЯ ТВОЙ ПУТЬ
-# ТАМ ГДЕ В КАВЫЧКАХ ТЕКСТ - ЗАМЕНЯЙ ЕГО НА ТЕКСТ С КАРТИНОК
-# ЧТОБЫ ПЕРЕВЕСТИ СТРОКУ - НАПИШИ \n
-# ЧТОБЫ СДЕЛАТЬ ОТСТУП(ТАБУЛЯЦИЮ) - НАПИШИ \t
-# ЧТОБЫ СДЕЛАТЬ ЖИРНЫЙ ШРИФТ - ЗАКЛЮЧИ ТЕКСТ В ЗВЕЗДОЧКИ. ПРИМЕР: *жирный текст*
-# ЧТОБЫ СДЕЛАТЬ КУРСИВНЫЙ ШРИФТ - ЗАКЛЮЧИ ТЕКСТ В ЗНАКИ ПОДЧЕРКИВАНИЯ. ПРИМЕР: _курсивный текст_
-# ЧТОБЫ СДЕЛАТЬ ССЫЛКУ - НАПИШИ [inline URL](http://www.example.com/)
-# УДАЧИ!!!
 
 @bot.message_handler(func=lambda item: item.text == config.about[0], content_types=['text'])
 def photo(message):
@@ -210,7 +201,8 @@ def photo(message):
 
 @bot.message_handler(func=lambda item: item.text == config.about[1], content_types=['text'])
 def callbacks(message):
-    bot.send_message(message.chat.id, 'Здесь будут отзывы', reply_markup=back_keyboard)
+    for item in config.reviews:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.about[2], content_types=['text'])
 def company(message):
@@ -221,27 +213,30 @@ def company(message):
 
 @bot.message_handler(func=lambda item: item.text == config.company[0], content_types=['text'])
 def mass_media(message):
-    bot.send_message(message.chat.id, 'Здесь будут отзывы прессы', reply_markup=back_keyboard)
+    for item in config.mass_media:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.company[1], content_types=['text'])
 def works(message):
-    bot.send_photo(message.chat.id, 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg',
-                   reply_markup=back_keyboard)
+    for item in config.works:
+        bot.send_photo(message.chat.id, item, reply_markup=back_keyboard)
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[3], content_types=['text'])
 def delivery(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация о способах доставки', reply_markup=back_keyboard)
+    for item in config.delivery:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[4], content_types=['text'])
 def sales(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация об акциях и скидках', reply_markup=back_keyboard)
+    for item in config.sales:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[5], content_types=['text'])
 def contacts(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация о контактах', reply_markup=back_keyboard)
-
+    for item in config.contacts:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 
 
@@ -251,9 +246,10 @@ def something_else(message):
 
 
 
-# @bot.message_handler(content_types=['photo'])
-# def add_speaker_photo(message):
-#     print(message.photo[0].file_id)
+
+@bot.message_handler(content_types=['photo'])
+def add_speaker_photo(message):
+    bot.send_message(message.chat.id, message.photo[0].file_id)
 
 if __name__ == '__main__':
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)

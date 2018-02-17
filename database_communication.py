@@ -3,7 +3,7 @@ from SQL.SQLighter import SQLighter
 from catalog import Catalog
 from email_sender import sendemail
 
-database_location = "../../django/db.sqlite3"
+database_location = "../test/db.sqlite3"
 
 def get_assortment():
     # download assortment from database 

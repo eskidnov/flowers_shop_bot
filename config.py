@@ -2,6 +2,8 @@
 
 from catalog import Catalog
 import database_communication
+from telebot.types import ShippingOption
+from  telebot.types import LabeledPrice
 
 # TEST
 token = '522784740:AAFE0fNxYt_1NytTIR4913k0VTTq0m1REYQ'
@@ -49,9 +51,40 @@ confirm_button = 'Оформить заказ'
 empty_basket = 'Корзина пуста!'
 clear_button = 'Очистить'
 pay_button = 'Оплатить'
-user_basket = 'Ваш заказ:'
+user_basket = 'Ваш заказ'
 ordering = 'Оформление заказа'
 successful_payment = 'Спасибо за покупку! Мы доставим ваш товар на сумму `{} {}` как можно быстрее! Оставайтесь на связи.'
+
+
+def set_shipping_option(id, title, *price):
+    shipping_option = ShippingOption(id=id, title=title)
+    shipping_option.add_price(*price)
+    return shipping_option
+
+shipping_options = [
+    set_shipping_option('1', 'Праздничный день', LabeledPrice('Доставка', 40000)),
+    set_shipping_option('2', 'В ночное время', LabeledPrice('Доставка', 40000)),
+    set_shipping_option('3', 'Батайск', LabeledPrice('Доставка', 45000)),
+    set_shipping_option('4', 'П. Рассвет', LabeledPrice('Доставка', 60000)),
+    set_shipping_option('5', 'П. Солнечный', LabeledPrice('Доставка', 45000)),
+    set_shipping_option('6', 'Аксай', LabeledPrice('Доставка', 40000)),
+    set_shipping_option('7', 'Ростов-на-Дону', LabeledPrice('Доставка', 30000)),
+    set_shipping_option('8', 'Чалтырь', LabeledPrice('Доставка', 45000)),
+    set_shipping_option('9', 'Азов', LabeledPrice('Доставка', 80000)),
+    set_shipping_option('10', 'Таганрог', LabeledPrice('Доставка', 150000)),
+    set_shipping_option('11', 'Старочеркасск', LabeledPrice('Доставка', 50000)),
+    set_shipping_option('12', 'Новочеркасск', LabeledPrice('Доставка', 80000)),
+    set_shipping_option('13', 'Шахты', LabeledPrice('Доставка', 150000)),
+    set_shipping_option('14', 'За город до 20 км.', LabeledPrice('Доставка', 75000)),
+    set_shipping_option('15', 'По области 20-35 км.', LabeledPrice('Доставка', 95000)),
+    set_shipping_option('16', 'По области 36-50 км.', LabeledPrice('Доставка', 130000)),
+    set_shipping_option('17', 'По области 51-75 км.', LabeledPrice('Доставка', 180000)),
+    set_shipping_option('18', 'По области 76-100 км.', LabeledPrice('Доставка',200000)),
+    set_shipping_option('19', 'По области 101-150 км.', LabeledPrice('Доставка', 300000)),
+    set_shipping_option('20', 'По области 151-200 км.', LabeledPrice('Доставка', 300000)),
+    set_shipping_option('21', 'В точное время', LabeledPrice('Доставка', 50000)),
+]
+
 
 error_category = 'Такой категории не существует!'
 
@@ -126,11 +159,11 @@ delivery = [
     'Срочный заказ - до 3х часов оплачивается дополнительно - *300 рублей*.'
 ]
 sales = [
-    '*5%* - скидка для клиентов, заказавших в нашей мастерской 3 и более букетов!\n'\
+    '*5%* - скидка для клиентов, заказавших в нашей мастерской 3 и более букетов!\n',
     '*7%* - скидка для клиентов, заказавших в нашей мастерской 7 и более букетов! Так же Вы получаете бесплатно '\
-    'дополнительные услуги от цветочной мастерской Florissimo!\n'\
+    'дополнительные услуги от цветочной мастерской Florissimo!\n',
     '*10%* - скидка для клиентов, заказавших в нашей мастерской 15 и более букетов! Так же для таких клиентов - '\
-    'дизайнерская открытка к каждому букету в подарок! И расширенный комплекс услуг!\n'\
+    'дизайнерская открытка к каждому букету в подарок! И расширенный комплекс услуг!\n',
     '*15%* - индивидуальная скидка, предназначена для самых преданных клиентов! Решение о такой скидке коллектив '\
     'цветочной мастерской Florissimo принимает на основании многих факторов и индивидуально в отношении каждого клиента!'\
     ' Вы тоже можете получить такую скидку, даря цветы своим близким!',
@@ -151,6 +184,6 @@ contacts = [
     '- *Мы ВКонтакте*:\n'\
     '- *Мы в Facebook*:\n'\
     '- *Наш блог*:\n'\
-    '- *Skype*:\n',
-    '- *Instagram*: florissimo_shop'
+    '- *Skype*:\n'\
+    '- *Instagram*: florissimo\_shop'
 ]

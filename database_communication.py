@@ -43,7 +43,7 @@ def resolve_assortment_tree(assortment):
         #item[4] = 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg'
         #insert_into_cat(cat, item[5].split(','), Catalog(item[1], [str(item[3]), item[4]]))
         insert_into_cat(cat, item[5].split(','), Catalog(item[1], \
-            [str(item[3]), 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg']))
+            [item[2] + '\n' + str(item[3]), item[4]]))
     return cat
 
 

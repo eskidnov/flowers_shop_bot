@@ -57,5 +57,14 @@ def append_request(name, email, phone, address, buys_list, summary_cost, comment
         "Заказ", \
         "Hello, " + name + "!\nYour request:\n" + str(buys_list) + "\n на сумму: " + str(summary_cost) + "\n",\
         "botograthautomat", "abracadabr")
+
+    sendemail("botograthautomat@gmail.com", \
+        "vl.kurochkin.business@gmail.com", \
+        [],\
+        "Заказ", \
+        "для пользователя " + name + "\nRequest:\n" + str(buys_list) + "\n на сумму: " + str(summary_cost) + "\n" +\
+        "на адрес: " + address + "\n",\
+        "botograthautomat", "abracadabr")
+
     database = SQLighter(database_location)
     database.insert_request(name, email, phone, address, buys_list, summary_cost, comment, 0)

@@ -45,15 +45,15 @@ def catalog_button(message):
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
-    bot.send_message(chat_id, '*'+config.main_menu_keyboard[0]+'*', reply_markup=back_keyboard, parse_mode='Markdown')
-    bot.send_message(chat_id, '.', reply_markup=keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, config.main_menu_keyboard[0], reply_markup=back_keyboard, parse_mode='Markdown')
+    bot.send_message(chat_id, 'Выберите категорию', reply_markup=keyboard, parse_mode='Markdown')
 
 
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
 def catalog(query):
     category = cat.find(query.data)
     bot.answer_callback_query(query.id)
-    print('Пользователь', query.message.from_user.id, 'открыл', category.item)
+    print('Пользователь', query.from_user.id, 'открыл', category.item)
     if isinstance(category.categories[0].categories[0], str):
         for item in category.categories:
             keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
@@ -80,6 +80,8 @@ def catalog(query):
 def add_to_basket(query):
     print(query.data)
     item = query.data.split('_')[1]
+    if not utils.get_basket(query.from_user.id):
+        utils.set_basket(query.from_user.id)
     utils.add_to_basket(query.from_user.id, item)
     bot.answer_callback_query(callback_query_id=query.id, text='Успешно добавлено!')
 
@@ -125,8 +127,11 @@ def check_basket(message):
         keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
         pay_button = telebot.types.InlineKeyboardButton(text=config.pay_button, pay=True)
         keyboard.add(pay_button)
+        price = 0
         for item in user_basket:
-            res += item + '\n'
+            item_price = cat.find(item).categories[0].split('\n')[-1]
+            res += item + ' - ' + item_price + ' руб.\n'
+            price += int(item_price)
         # bot.send_message(message.chat.id, res, parse_mode='Markdown', reply_markup=keyboard)
 
         bot.send_invoice(chat_id=message.chat.id,
@@ -136,7 +141,7 @@ def check_basket(message):
                          provider_token=config.provider_token,
                          start_parameter='invoice',
                          currency='rub',
-                         prices=[telebot.types.LabeledPrice(label=config.user_basket, amount=10000)],
+                         prices=[telebot.types.LabeledPrice(label=config.user_basket, amount=price*100)],
                          need_name=True,
                          need_email=True,
                          need_phone_number=True,
@@ -146,17 +151,12 @@ def check_basket(message):
     else:
         bot.send_message(chat_id=message.chat.id, text=config.empty_basket)
 
-def set_shipping_option(id, title, *price):
-    shipping_option = telebot.types.ShippingOption(id=id, title=title)
-    shipping_option.add_price(*price)
-    return shipping_option
 
 @bot.shipping_query_handler(func=lambda query: True)
 def shipping(shipping_query):
     bot.answer_shipping_query(shipping_query_id=shipping_query.id,
                               ok=True,
-                              shipping_options=[set_shipping_option('delivery', 'Доставка курьером',
-                                                                    telebot.types.LabeledPrice('Курьер', 10000)),],
+                              shipping_options=config.shipping_options,
                               error_message='error')
 
 
@@ -182,6 +182,8 @@ def got_payment(message):
     append_request(order_info.name, order_info.email, order_info.phone_number, order_info.shipping_address,
                    buys_list, message.successful_payment.total_amount / 100, '')
 
+    utils.del_user_basket(message.from_user.id)
+
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[2], content_types=['text'])
@@ -189,19 +191,9 @@ def about(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     buttons = (telebot.types.KeyboardButton(text) for text in config.about)
     keyboard.add(*buttons)
+    keyboard.add(telebot.types.KeyboardButton(text=config.back_button))
     bot.send_message(message.chat.id, config.main_menu_keyboard[2], reply_markup=keyboard)
 
-
-
-# ВЛАД!!!
-# ЗДЕСЬ НАЧИНАЕТСЯ ТВОЙ ПУТЬ
-# ТАМ ГДЕ В КАВЫЧКАХ ТЕКСТ - ЗАМЕНЯЙ ЕГО НА ТЕКСТ С КАРТИНОК
-# ЧТОБЫ ПЕРЕВЕСТИ СТРОКУ - НАПИШИ \n
-# ЧТОБЫ СДЕЛАТЬ ОТСТУП(ТАБУЛЯЦИЮ) - НАПИШИ \t
-# ЧТОБЫ СДЕЛАТЬ ЖИРНЫЙ ШРИФТ - ЗАКЛЮЧИ ТЕКСТ В ЗВЕЗДОЧКИ. ПРИМЕР: *жирный текст*
-# ЧТОБЫ СДЕЛАТЬ КУРСИВНЫЙ ШРИФТ - ЗАКЛЮЧИ ТЕКСТ В ЗНАКИ ПОДЧЕРКИВАНИЯ. ПРИМЕР: _курсивный текст_
-# ЧТОБЫ СДЕЛАТЬ ССЫЛКУ - НАПИШИ [inline URL](http://www.example.com/)
-# УДАЧИ!!!
 
 @bot.message_handler(func=lambda item: item.text == config.about[0], content_types=['text'])
 def photo(message):
@@ -210,38 +202,43 @@ def photo(message):
 
 @bot.message_handler(func=lambda item: item.text == config.about[1], content_types=['text'])
 def callbacks(message):
-    bot.send_message(message.chat.id, 'Здесь будут отзывы', reply_markup=back_keyboard)
+    for item in config.reviews:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.about[2], content_types=['text'])
 def company(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     buttons = (telebot.types.KeyboardButton(text) for text in config.company)
     keyboard.add(*buttons)
+    keyboard.add(telebot.types.KeyboardButton(text=config.back_button))
     bot.send_message(message.chat.id, config.about[2], reply_markup=keyboard)
 
 @bot.message_handler(func=lambda item: item.text == config.company[0], content_types=['text'])
 def mass_media(message):
-    bot.send_message(message.chat.id, 'Здесь будут отзывы прессы', reply_markup=back_keyboard)
+    for item in config.mass_media:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.company[1], content_types=['text'])
 def works(message):
-    bot.send_photo(message.chat.id, 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg',
-                   reply_markup=back_keyboard)
+    for item in config.works:
+        bot.send_photo(message.chat.id, item, reply_markup=back_keyboard)
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[3], content_types=['text'])
 def delivery(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация о способах доставки', reply_markup=back_keyboard)
+    for item in config.delivery:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[4], content_types=['text'])
 def sales(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация об акциях и скидках', reply_markup=back_keyboard)
+    for item in config.sales:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[5], content_types=['text'])
 def contacts(message):
-    bot.send_message(message.chat.id, 'Здесь будет информация о контактах', reply_markup=back_keyboard)
-
+    for item in config.contacts:
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 
 
@@ -251,9 +248,10 @@ def something_else(message):
 
 
 
-# @bot.message_handler(content_types=['photo'])
-# def add_speaker_photo(message):
-#     print(message.photo[0].file_id)
+
+@bot.message_handler(content_types=['photo'])
+def add_speaker_photo(message):
+    bot.send_message(message.chat.id, message.photo[0].file_id)
 
 if __name__ == '__main__':
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)

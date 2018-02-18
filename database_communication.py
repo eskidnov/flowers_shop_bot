@@ -3,7 +3,7 @@ from SQL.SQLighter import SQLighter
 from catalog import Catalog
 from email_sender import sendemail
 
-database_location = "../test/db.sqlite3"
+database_location = "../flowers-bot-web-interface/db.sqlite3"
 
 def get_assortment():
     # download assortment from database 
@@ -63,7 +63,7 @@ def append_request(name, email, phone, address, buys_list, summary_cost, comment
         [],\
         "Заказ", \
         "для пользователя " + name + "\nRequest:\n" + str(buys_list) + "\n на сумму: " + str(summary_cost) + "\n" +\
-        "на адрес: " + address + "\n",\
+        "на адрес: " + str(address) + "\n",\
         "botograthautomat", "abracadabr")
 
     database = SQLighter(database_location)

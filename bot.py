@@ -3,6 +3,7 @@
 import telebot
 import config
 import utils
+from catalog import hash
 from config import catalog as cat
 from database_communication import append_request
 
@@ -41,7 +42,7 @@ def catalog_button(message):
     print('Пользователь', message.from_user.id, 'открыл "Наш каталог"')
     chat_id = message.chat.id
     keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
-    buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=button_text.item)
+    buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=str(hash(button_text.item)))
                for button_text in cat.categories)
     keyboard.add(*buttons)
 
@@ -52,20 +53,21 @@ def catalog_button(message):
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
 def catalog(query):
     category = cat.find(query.data)
+    print(category)
     bot.answer_callback_query(query.id)
     print('Пользователь', query.from_user.id, 'открыл', category.item)
     if isinstance(category.categories[0].categories[0], str):
         for item in category.categories:
             keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
             keyboard.add(telebot.types.InlineKeyboardButton(text=config.add_to_basket,
-                                                            callback_data=config.add_to_basket+'_'+item.item))
+                                                            callback_data=config.add_to_basket+'_'+str(hash(item.item))))
             bot.send_message(query.message.chat.id, '*' + item.item + '*', reply_markup=back_keyboard,
                              parse_mode='Markdown')
             bot.send_photo(query.message.chat.id, caption=item.categories[0], photo=item.categories[1],
                            reply_markup=keyboard)
     else:
         keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
-        buttons = (telebot.types.InlineKeyboardButton(text=subcat.item, callback_data=subcat.item)
+        buttons = (telebot.types.InlineKeyboardButton(text=subcat.item, callback_data=str(hash(subcat.item)))
                    for subcat in category.categories)
         keyboard.add(*buttons)
 
@@ -79,10 +81,10 @@ def catalog(query):
 @bot.callback_query_handler(func=lambda query: config.add_to_basket in query.data)
 def add_to_basket(query):
     print(query.data)
-    item = query.data.split('_')[1]
+    item = cat.find(query.data.split('_')[1])
     if not utils.get_basket(query.from_user.id):
         utils.set_basket(query.from_user.id)
-    utils.add_to_basket(query.from_user.id, item)
+    utils.add_to_basket(query.from_user.id, str(hash(item.item)))
     bot.answer_callback_query(callback_query_id=query.id, text='Успешно добавлено!')
 
 
@@ -101,8 +103,11 @@ def basket(message):
     if user_basket:
         for item in user_basket:
             product = cat.find(item)
-            bot.send_message(message.chat.id, '*'+product.item+'*', parse_mode='Markdown')
-            bot.send_photo(message.chat.id, caption=product.categories[0], photo=product.categories[1])
+            if (product):
+                bot.send_message(message.chat.id, '*'+product.item+'*', parse_mode='Markdown')
+                bot.send_photo(message.chat.id, caption=product.categories[0], photo=product.categories[1])
+            else:
+                bot.send_message(message.chat.id, 'База данных товаров обновилась! Похоже, некоторых товаров из вашей корзины больше нет...')
     else:
         bot.send_message(chat_id=message.chat.id, text=config.empty_basket)
 
@@ -130,7 +135,7 @@ def check_basket(message):
         price = 0
         for item in user_basket:
             item_price = cat.find(item).categories[0].split('\n')[-1]
-            res += item + ' - ' + item_price + ' руб.\n'
+            res += cat.find(item).item + ' - ' + item_price + ' руб.\n'
             price += int(item_price)
         # bot.send_message(message.chat.id, res, parse_mode='Markdown', reply_markup=keyboard)
 
@@ -178,7 +183,7 @@ def got_payment(message):
     user_basket = utils.get_basket(user_id)
     buys_list = ''
     for item in user_basket:
-        buys_list += item + '\n'
+        buys_list += cat.find(item).item + '\n'
     append_request(order_info.name, order_info.email, order_info.phone_number, order_info.shipping_address,
                    buys_list, message.successful_payment.total_amount / 100, '')
 
@@ -243,8 +248,9 @@ def contacts(message):
 
 
 @bot.callback_query_handler(func=lambda query: query.data)
-def something_else(message):
-    bot.send_message(message.chat.id, config.error_category, reply_markup=back_keyboard)
+def something_else(query):
+    bot.answer_callback_query(query.id)
+    bot.send_message(query.message.chat.id, config.error_category, reply_markup=back_keyboard)
 
 
 

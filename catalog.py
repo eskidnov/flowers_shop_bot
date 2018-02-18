@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 
+
+def hash(astring, tablesize=10000000000000000000):
+    sum = 0
+    for pos in range(len(astring)):
+        sum = sum + ord(astring[pos])
+
+    return sum%tablesize
+
+
 class Catalog:
 
     # def __init__(self, item, *categories):
@@ -18,7 +27,7 @@ class Catalog:
         # print (self.item, self.categories)
         if not self.categories or isinstance(self.categories[0], str):
             return
-        all_categories.append(self.item)
+        all_categories.append(str(hash(self.item)))
         for subcat in self.categories:
             #if not subcat.categories:
                 subcat.__view(all_categories)
@@ -30,13 +39,13 @@ class Catalog:
 
     def find(self, category):
         print(self.item)
-        if self.item == category or not self.categories or isinstance(self.categories[0], str):
+        if str(hash(self.item)) == category or not self.categories or isinstance(self.categories[0], str):
             return self
         for subcat in self.categories:
             a = subcat.find(category)
             if a is None or isinstance(self.categories[0], str):
                 continue
-            if a.item == category:
+            if str(hash(a.item)) == category:
                 return a
         return None
 

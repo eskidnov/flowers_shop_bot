@@ -3,14 +3,17 @@
 import telebot
 import config
 import utils
+import time
 from catalog import hash
 from config import catalog as cat
 from database_communication import append_request
+import importlib
 
 bot = telebot.TeleBot(config.token)
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    importlib.reload(config)
     utils.del_user_basket(message.from_user.id)
     utils.set_basket(message.from_user.id)
     print('Бот запущен пользователем', message.from_user.id)
@@ -270,6 +273,18 @@ if __name__ == '__main__':
 
     hidden_keyboard = telebot.types.ReplyKeyboardRemove()
 
-    bot.polling(none_stop=True)
+    while True:
+        try:
+            bot.polling(none_stop=True)
+            print ('polled')
+        except (KeyboardInterrupt, SystemExit):
+            break
+        except Exception as err:
+            print (err)
+            time.sleep(5)
+            print ('Polling error')
+            continue
+        break
+
 
 

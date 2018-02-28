@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import shelve
-from SQL.SQLighter import SQLighter
+# from SQL.SQLighter import SQLighter
 from config import shelve_name
 
 # def count_rows():

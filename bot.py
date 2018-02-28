@@ -8,8 +8,44 @@ from catalog import hash
 from config import catalog as cat
 from database_communication import append_request
 import importlib
+import cherrypy
+
+
+# WEBHOOK_HOST = '195.133.1.136'
+# WEBHOOK_PORT = 443  # 443, 80, 88 или 8443 (порт должен быть открыт!)
+# WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах придется указывать такой же IP, что и выше
+#
+# WEBHOOK_SSL_CERT = './webhook_cert.pem'  # Путь к сертификату
+# WEBHOOK_SSL_PRIV = './webhook_pkey.pem'  # Путь к приватному ключу
+#
+# WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
+# WEBHOOK_URL_PATH = "/%s/" % (config.token)
 
 bot = telebot.TeleBot(config.token)
+
+
+
+# # Наш вебхук-сервер
+# class WebhookServer(object):
+#     @cherrypy.expose
+#     def index(self):
+#         if 'content-length' in cherrypy.request.headers and \
+#                         'content-type' in cherrypy.request.headers and \
+#                         cherrypy.request.headers['content-type'] == 'application/json':
+#             length = int(cherrypy.request.headers['content-length'])
+#             json_string = cherrypy.request.body.read(length).decode("utf-8")
+#             update = telebot.types.Update.de_json(json_string)
+#             # Эта функция обеспечивает проверку входящего сообщения
+#             bot.process_new_updates([update])
+#             return ''
+#         else:
+#             raise cherrypy.HTTPError(403)
+
+
+
+
+
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -205,13 +241,17 @@ def about(message):
 
 @bot.message_handler(func=lambda item: item.text == config.about[0], content_types=['text'])
 def photo(message):
-    bot.send_photo(message.chat.id, 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg',
-                   reply_markup=back_keyboard)
+    for item in config.photos:
+        bot.send_photo(message.chat.id, item, reply_markup=back_keyboard)
+    bot.send_message(message.chat.id, '*Больше фото доставок можно найти на нашем сайте:* '\
+                                      'http://www.florissimo-shop.ru/getflower.html?page=1', parse_mode='Markdown',
+                     disable_web_page_preview=True)
 
 @bot.message_handler(func=lambda item: item.text == config.about[1], content_types=['text'])
 def callbacks(message):
     for item in config.reviews:
-        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown',
+                         disable_web_page_preview=True)
 
 @bot.message_handler(func=lambda item: item.text == config.about[2], content_types=['text'])
 def company(message):
@@ -220,6 +260,7 @@ def company(message):
     keyboard.add(*buttons)
     keyboard.add(telebot.types.KeyboardButton(text=config.back_button))
     bot.send_message(message.chat.id, config.about[2], reply_markup=keyboard)
+    bot.send_message(message.chat.id, config.company_info, disable_web_page_preview=True, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda item: item.text == config.company[0], content_types=['text'])
 def mass_media(message):
@@ -228,8 +269,12 @@ def mass_media(message):
 
 @bot.message_handler(func=lambda item: item.text == config.company[1], content_types=['text'])
 def works(message):
+    bot.send_message(message.chat.id, '*Красно-пурпурная свадьба в Усадьбе*', parse_mode='Markdown')
     for item in config.works:
         bot.send_photo(message.chat.id, item, reply_markup=back_keyboard)
+    bot.send_message(message.chat.id, '*Больше фото и видео наших работ можно найти на нашем сайте:* '\
+                                      'http://www.florissimo-shop.ru/portfolio.html', parse_mode='Markdown',
+                     disable_web_page_preview=True)
 
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[3], content_types=['text'])
@@ -246,7 +291,8 @@ def sales(message):
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[5], content_types=['text'])
 def contacts(message):
     for item in config.contacts:
-        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
+        bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown',
+                         disable_web_page_preview=True)
 
 
 
@@ -263,6 +309,29 @@ def add_speaker_photo(message):
     bot.send_message(message.chat.id, message.photo[0].file_id)
 
 if __name__ == '__main__':
+
+    # # Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
+    # bot.remove_webhook()
+    #
+    # # Ставим заново вебхук
+    # bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+    #                 certificate=open(WEBHOOK_SSL_CERT, 'r'))
+    #
+    # # Указываем настройки сервера CherryPy
+    # cherrypy.config.update({
+    #     'server.socket_host': WEBHOOK_LISTEN,
+    #     'server.socket_port': WEBHOOK_PORT,
+    #     'server.ssl_module': 'builtin',
+    #     'server.ssl_certificate': WEBHOOK_SSL_CERT,
+    #     'server.ssl_private_key': WEBHOOK_SSL_PRIV
+    # })
+    #
+    # # Собственно, запуск!
+    # cherrypy.quickstart(WebhookServer(), WEBHOOK_URL_PATH, {'/': {}})
+
+
+
+
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     buttons = (telebot.types.KeyboardButton(text=button_text) for button_text in config.main_menu_keyboard
                if config.main_menu_keyboard.index(button_text) < 6)

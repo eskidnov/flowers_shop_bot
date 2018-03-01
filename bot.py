@@ -102,8 +102,13 @@ def catalog(query):
                                                             callback_data=config.add_to_basket+'_'+str(hash(item.item))))
             bot.send_message(query.message.chat.id, '*' + item.item + '*', reply_markup=back_keyboard,
                              parse_mode='Markdown')
-            bot.send_photo(query.message.chat.id, caption=item.categories[0], photo=item.categories[1],
+            try:
+            	bot.send_photo(query.message.chat.id, caption=item.categories[0], photo=item.categories[1],
                            reply_markup=keyboard)
+            except telebot.apihelper.ApiException as ex:
+                print ("err pic not found on ", item.categories[1])
+                bot.send_message(query.message.chat.id, "err: pic not found", reply_markup=back_keyboard, parse_mode='Markdown')
+               
     else:
         keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
         buttons = (telebot.types.InlineKeyboardButton(text=subcat.item, callback_data=str(hash(subcat.item)))

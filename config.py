@@ -7,7 +7,7 @@ from  telebot.types import LabeledPrice
 import logging
 
 # TEST
-token = '522784740:AAFE0fNxYt_1NytTIR4913k0VTTq0m1REYQ'
+token = '401643678:TEST:acc764d4-10e3-40c6-9252-d740d0f98574'
 provider_token = '381764678:TEST:4464'
 
 shelve_name = 'shelve.db'

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 
 def hash(astring, tablesize=10000000000000000000):
     sum = 0
@@ -20,7 +21,7 @@ class Catalog:
         if isinstance(categories, list) or categories==None:
             self.categories = categories
         else:
-            print('Неверный формат категорий')
+            logging.error('Неверный формат категорий')
             self.categories = None
 
     def __view(self, all_categories):
@@ -38,7 +39,7 @@ class Catalog:
         return all_categories
 
     def find(self, category):
-        print(self.item)
+        logging.info(str(self.item))
         if str(hash(self.item)) == category or not self.categories or isinstance(self.categories[0], str):
             return self
         for subcat in self.categories:

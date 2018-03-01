@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 import random
+import logging
 
 class SQLighter:
 
@@ -15,7 +16,8 @@ class SQLighter:
             return self.cursor.execute('SELECT * FROM ' + table).fetchall()
 
     def insert_request(self, name, email, phone, address, buys_list, summary_cost, comment, status):
-        print (name, email, phone, address, buys_list, summary_cost, comment, status)
+        logging.warning(str(name) + ' ' + str(email) + ' ' + str(phone) + ' ' + str(address) + \
+            ' ' + str(buys_list) + ' ' + str(summary_cost) + ' ' + str(comment) + ' ' + str(status))
         with self.connection:
             return self.cursor.execute('INSERT INTO flowers_request VALUES (NULL,?,?,?,?,?,?,?,?)', \
                 (name, email, phone, str(address), buys_list, int(summary_cost), comment, status,))

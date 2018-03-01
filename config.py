@@ -4,6 +4,7 @@ from catalog import Catalog
 import database_communication
 from telebot.types import ShippingOption
 from  telebot.types import LabeledPrice
+import logging
 
 # TEST
 token = '522784740:AAFE0fNxYt_1NytTIR4913k0VTTq0m1REYQ'
@@ -24,6 +25,10 @@ main_menu_keyboard = [
 back_button = 'Назад'
 
 catalog = database_communication.resolve_assortment_tree(database_communication.get_assortment())
+
+loggingLevel = logging.DEBUG
+
+logging.basicConfig(format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = config.loggingLevel)
 
 
 """

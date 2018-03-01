@@ -2,6 +2,7 @@
 import shelve
 from SQL.SQLighter import SQLighter
 from config import shelve_name
+import logging
 
 # def count_rows():
 #     """
@@ -67,11 +68,11 @@ def del_from_basket(user_id, product):
     """
     with shelve.open(shelve_name) as storage:
         temp = storage[str(user_id)]
-        print(temp)
+        logging.info(temp)
         try:
             temp.pop(product)
         except:
-            print('В корзине нет товара', product.item)
+            logging.warn('В корзине нет товара ' + str(product.item))
         storage[str(user_id)] = temp
 
 
@@ -86,7 +87,7 @@ def remove_amount(user_id, product):
         if temp.get(product, None):
             temp[product] = temp[product] - 1
         else:
-            print('Такого товара в корзине нет!')
+            logging.warn('Такого товара в корзине нет!')
         storage[str(user_id)] = temp
 
 
@@ -110,7 +111,7 @@ def del_user_basket(user_id):
         try:
             del storage[str(user_id)]
         except:
-            print('Корзины пользователя не существует!')
+            logging.warn('Корзины пользователя не существует!')
 
 
 def get_answer_for_user(chat_id):

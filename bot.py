@@ -8,6 +8,7 @@ from catalog import hash
 from config import catalog as cat
 from database_communication import append_request
 import importlib
+import logging
 
 bot = telebot.TeleBot(config.token)
 
@@ -16,14 +17,16 @@ def start(message):
     importlib.reload(config)
     utils.del_user_basket(message.from_user.id)
     utils.set_basket(message.from_user.id)
-    print('Бот запущен пользователем', message.from_user.id)
+    logging.info('Бот запущен пользователем', message.from_user.id)
     bot.send_message(message.chat.id, config.main_menu, parse_mode='markdown', reply_markup=main_menu_keyboard)
+
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    print('Пользоватль', message.from_user.id, 'открыл список комманд')
+    logging.info('Пользователь ' + str(message.from_user.id) + ' открыл список комманд')
     msg = '/start - запустить бота\n/help - отобразить список доступных команд'
     bot.send_message(message.chat.id, msg, parse_mode='markdown', reply_markup=hidden_keyboard)
+
 
 @bot.message_handler(func=lambda item: item.text == config.back_button, content_types=['text'])
 def back(message):
@@ -31,8 +34,9 @@ def back(message):
     Возврат в меню (кнопка "Назад")
     :param message: Сообщение о нажатой кнопке
     """
-    print('Пользователь', message.from_user.id, 'вернулся в основное меню')
+    logging.info('Пользователь ' + str(message.from_user.id) + ' вернулся в основное меню')
     bot.send_message(message.chat.id, config.main_menu, reply_markup=main_menu_keyboard)
+
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[0], content_types=['text'])
 def catalog_button(message):
@@ -41,8 +45,8 @@ def catalog_button(message):
     :param message: Сообщение о нажатой кнопке
     """
     # cat - переменная catalog из config.py
-    print (cat.get_all_categories())
-    print('Пользователь', message.from_user.id, 'открыл "Наш каталог"')
+    logging.info(str(cat.get_all_categories()))
+    logging.info('Пользователь ' + str(message.from_user.id) + ' открыл "Наш каталог"')
     chat_id = message.chat.id
     keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
     buttons = (telebot.types.InlineKeyboardButton(text=button_text.item, callback_data=str(hash(button_text.item)))
@@ -56,9 +60,9 @@ def catalog_button(message):
 @bot.callback_query_handler(func=lambda query: query.data in cat.get_all_categories())
 def catalog(query):
     category = cat.find(query.data)
-    print(category)
+    logging.info(str(category))
     bot.answer_callback_query(query.id)
-    print('Пользователь', query.from_user.id, 'открыл', category.item)
+    logging.info('Пользователь ' + str(query.from_user.id) + ' открыл' + str(category.item))
     if isinstance(category.categories[0].categories[0], str):
         for item in category.categories:
             keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
@@ -83,7 +87,7 @@ def catalog(query):
 
 @bot.callback_query_handler(func=lambda query: config.add_to_basket in query.data)
 def add_to_basket(query):
-    print(query.data)
+    logging.info(str(query.data))
     item = cat.find(query.data.split('_')[1])
     if not utils.get_basket(query.from_user.id):
         utils.set_basket(query.from_user.id)
@@ -114,6 +118,7 @@ def basket(message):
     else:
         bot.send_message(chat_id=message.chat.id, text=config.empty_basket)
 
+
 @bot.message_handler(func=lambda item: item.text == config.clear_button, content_types=['text'])
 def clear_basket(message):
     user_id = message.from_user.id
@@ -123,6 +128,7 @@ def clear_basket(message):
         utils.del_from_basket(user_id, item)
 
     bot.send_message(message.chat.id, config.empty_basket)
+
 
 @bot.message_handler(func=lambda item: item.text == config.confirm_button, content_types=['text'])
 def check_basket(message):
@@ -193,7 +199,6 @@ def got_payment(message):
     utils.del_user_basket(message.from_user.id)
 
 
-
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[2], content_types=['text'])
 def about(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -208,10 +213,12 @@ def photo(message):
     bot.send_photo(message.chat.id, 'https://megaflowers.ru/pub/bouquet/vse-budet-horosho_m.jpg',
                    reply_markup=back_keyboard)
 
+
 @bot.message_handler(func=lambda item: item.text == config.about[1], content_types=['text'])
 def callbacks(message):
     for item in config.reviews:
         bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
+
 
 @bot.message_handler(func=lambda item: item.text == config.about[2], content_types=['text'])
 def company(message):
@@ -221,10 +228,12 @@ def company(message):
     keyboard.add(telebot.types.KeyboardButton(text=config.back_button))
     bot.send_message(message.chat.id, config.about[2], reply_markup=keyboard)
 
+
 @bot.message_handler(func=lambda item: item.text == config.company[0], content_types=['text'])
 def mass_media(message):
     for item in config.mass_media:
         bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
+
 
 @bot.message_handler(func=lambda item: item.text == config.company[1], content_types=['text'])
 def works(message):
@@ -236,6 +245,7 @@ def works(message):
 def delivery(message):
     for item in config.delivery:
         bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
+
 
 @bot.message_handler(func=lambda item: item.text == config.main_menu_keyboard[4], content_types=['text'])
 def sales(message):
@@ -249,18 +259,16 @@ def contacts(message):
         bot.send_message(message.chat.id, item, reply_markup=back_keyboard, parse_mode='Markdown')
 
 
-
 @bot.callback_query_handler(func=lambda query: query.data)
 def something_else(query):
     bot.answer_callback_query(query.id)
     bot.send_message(query.message.chat.id, config.error_category, reply_markup=back_keyboard)
 
 
-
-
 @bot.message_handler(content_types=['photo'])
 def add_speaker_photo(message):
     bot.send_message(message.chat.id, message.photo[0].file_id)
+
 
 if __name__ == '__main__':
     main_menu_keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -276,13 +284,13 @@ if __name__ == '__main__':
     while True:
         try:
             bot.polling(none_stop=True)
-            print ('polled')
+            logging.warn('polled')
         except (KeyboardInterrupt, SystemExit):
             break
         except Exception as err:
-            print (err)
+            logging.error(err)
+            logging.error('Polling error')
             time.sleep(5)
-            print ('Polling error')
             continue
         break
 

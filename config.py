@@ -28,7 +28,7 @@ catalog = database_communication.resolve_assortment_tree(database_communication.
 
 loggingLevel = logging.DEBUG
 
-logging.basicConfig(format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = config.loggingLevel)
+logging.basicConfig(format = u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', level = loggingLevel)
 
 
 """

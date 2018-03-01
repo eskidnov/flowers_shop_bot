@@ -1,18 +1,7 @@
 # -*- coding: utf-8 -*-
 import shelve
-# from SQL.SQLighter import SQLighter
 from config import shelve_name
 import logging
-
-# def count_rows():
-#     """
-#     Данный метод считает общее количество строк в базе данных и сохраняет в хранилище.
-#     """
-#     db = SQLighter(database_name)
-#     rowsnum = db.count_rows()
-#     with shelve.open(shelve_name) as storage:
-#         storage['rows_count'] = rowsnum
-
 
 def get_rows_count():
     """

@@ -7,8 +7,8 @@ from  telebot.types import LabeledPrice
 import logging
 
 # TEST
-token = '522784740:AAFE0fNxYt_1NytTIR4913k0VTTq0m1REY'
-provider_token = '401643678:TEST:acc764d4-10e3-40c6-9252-d740d0f98574'
+token = '522784740:AAFE0fNxYt_1NytTIR4913k0VTTq0m1REYQ'
+provider_token = '410182388:LIVE:61fe67a7-d479-4d17-aec9-6e74bf71ea0b'
 
 shelve_name = 'shelve.db'
 
@@ -67,6 +67,7 @@ def set_shipping_option(id, title, *price):
     return shipping_option
 
 shipping_options = [
+    set_shipping_option('0', 'Тест', LabeledPrice('Доставка', 1000)),
     set_shipping_option('1', 'Праздничный день', LabeledPrice('Доставка', 40000)),
     set_shipping_option('2', 'В ночное время', LabeledPrice('Доставка', 40000)),
     set_shipping_option('3', 'Батайск', LabeledPrice('Доставка', 45000)),

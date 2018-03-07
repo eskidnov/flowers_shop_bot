@@ -51,15 +51,15 @@ def append_request(name, email, phone, address, buys_list, summary_cost, comment
     # TODO: переместить отправку email и поднастроить ее
     # поставить async
 
-    sendemail("botograthautomat@gmail.com", \
-        email if email is not None else "andreypopovkin@yandex.ru", \
+    sendemail("florissimo@mail.ru", \
+        email if email is not None else "florissimo@mail.ru.ru", \
         [],\
         "Заказ", \
         "Hello, " + name + "!\nYour request:\n" + str(buys_list) + "\n на сумму: " + str(summary_cost) + "\n",\
         "botograthautomat", "abracadabr")
 
-    sendemail("botograthautomat@gmail.com", \
-        "vl.kurochkin.business@gmail.com", \
+    sendemail("florissimo@mail.ru", \
+        "florissimo@mail.ru", \
         [],\
         "Заказ", \
         "для пользователя " + name + "\nRequest:\n" + str(buys_list) + "\n на сумму: " + str(summary_cost) + "\n" +\
